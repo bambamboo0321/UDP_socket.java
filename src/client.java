@@ -56,17 +56,16 @@ public class client {
         DatagramSocket socket = new DatagramSocket(client_portNo);//設定socket需要設定port
         DatagramPacket rcv_packet = new DatagramPacket(rcv_buf, rcv_buf.length);
         //建立Datagram packet資料封包,限制packet值和長度大小
-
+        System.out.println(getLocalHostLANAddress());
         System.out.println("Please input your name :");
         String name = scanner.next();
         System.out.println("Please input the IP address of destination :");
         String ServerIP = scanner.next();
-        InetAddress addr = InetAddress.getByName(ServerIP);
+        InetAddress addr = InetAddress.getByName("192.168.0.11");
 
         //訊息封包(值 大小 位址 port)
         DatagramPacket send_packet = new DatagramPacket(ServerIP.getBytes(), ServerIP.length(), addr, server_portNo);
-        System.out.println(getLocalHostLANAddress());
-        getLocalHostLANAddress();
+
         while(flag)
         {
             //receive server 傳送的n
