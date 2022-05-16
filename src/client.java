@@ -1,13 +1,48 @@
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
+import java.util.Enumeration;
 import java.util.Scanner;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class client {
+    private static InetAddress getLocalHostLANAddress() throws UnknownHostException {
+        try {
+            InetAddress candidateAddress = null;
+            // 遞迴所有網路通道
+            for (Enumeration ifaces = NetworkInterface.getNetworkInterfaces(); ifaces.hasMoreElements(); ) {
+                NetworkInterface iface = (NetworkInterface) ifaces.nextElement();
+                // 在所有的網路通道下遍历IP
+                for (Enumeration inetAddrs = iface.getInetAddresses(); inetAddrs.hasMoreElements(); ) {
+                    InetAddress inetAddr = (InetAddress) inetAddrs.nextElement();
+                    if (!inetAddr.isLoopbackAddress()) {// 排除loopback類型的IP位址
+                        if (inetAddr.isSiteLocalAddress()) {
+                            // 如果是site-localIP位址，就是它了
+                            return inetAddr;
+                        } else if (candidateAddress == null) {
+                            // site-local類型的IP位址沒被發現，先記錄起來
+                            candidateAddress = inetAddr;
+                        }
+                    }
+                }
+            }
+            if (candidateAddress != null) {
+                return candidateAddress;
+            }
+            // 若只有 loopback IP位址,則只能選其他的
+            InetAddress jdkSuppliedAddress = InetAddress.getLocalHost();
+            if (jdkSuppliedAddress == null) {
+                throw new UnknownHostException("The JDK InetAddress.getLocalHost() method unexpectedly returned null.");
+            }
+            return jdkSuppliedAddress;
+        } catch (Exception e) {
+            UnknownHostException unknownHostException = new UnknownHostException(
+                    "Failed to determine LAN address: " + e);
+            unknownHostException.initCause(e);
+            throw unknownHostException;
+        }
+    }
     public static  void main(String args[])throws Exception
     {
         String msg, result, total_data="", f = null, rank;
@@ -30,7 +65,8 @@ public class client {
 
         //訊息封包(值 大小 位址 port)
         DatagramPacket send_packet = new DatagramPacket(ServerIP.getBytes(), ServerIP.length(), addr, server_portNo);
-        socket.send(send_packet);
+        System.out.println(getLocalHostLANAddress());
+        getLocalHostLANAddress();
         while(flag)
         {
             //receive server 傳送的n
