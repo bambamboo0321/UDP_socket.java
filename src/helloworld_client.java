@@ -11,7 +11,7 @@ public class helloworld_client {
         System.out.println("Please input the IP address of destination :");
         BufferedReader uip = new BufferedReader(new InputStreamReader(System.in));
         String serverIP = uip.readLine();
-        InetAddress addr = InetAddress.getByName("192.168.0.15");
+        InetAddress addr = InetAddress.getByName(serverIP);
         while (true) {
             System.out.println("send msg:");
             String msg = uip.readLine();

@@ -56,8 +56,9 @@ public class server {
         System.out.println(getLocalHostLANAddress().toString());
         System.out.println("Server端開始接受連線請求!");
 
-        File doc = new File("E:\\college\\college2-2\\Network\\UDP_socket.txt");
 
+        File doc = new File(".\\UDP_socket.txt");
+        doc.createNewFile();
         DatagramSocket socket = new DatagramSocket(server_portNo);//設定socket需要設定port
         DatagramPacket rcv_packet = new DatagramPacket(buffer, buffer.length);
         System.out.println("~~~~~~Wait client response~~~~~~");
@@ -123,7 +124,7 @@ public class server {
             for(i = 0;i<readLine;i++)
                 if(Integer.parseInt(temp[3])<Integer.parseInt(arr[i][3]))break;
 
-            FileWriter fw = new FileWriter("E:\\college\\college2-2\\Network\\UDP_socket.txt");
+            FileWriter fw = new FileWriter(".\\UDP_socket.txt");
 
             for(int j = 0;j<readLine;i++)
             {
@@ -131,6 +132,7 @@ public class server {
                     fw.write(total_data);
                 fw.write(arr[j][0]+"，"+arr[j][1]+"，"+arr[j][2]+"，"+arr[j][3]);
             }
+            fw.close();
             result = temp[0]+",恭喜你猜對了!你是第"+i+1+"名";
             
             System.out.println(result);

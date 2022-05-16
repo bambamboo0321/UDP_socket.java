@@ -65,7 +65,7 @@ public class client {
 
         //訊息封包(值 大小 位址 port)
         DatagramPacket send_packet = new DatagramPacket(ServerIP.getBytes(), ServerIP.length(), addr, server_portNo);
-
+        socket.send(send_packet);
         while(flag)
         {
             //receive server 傳送的n
