@@ -1,12 +1,14 @@
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.nio.charset.StandardCharsets;
 
 public class test {
-    public static void main(String[] args) {
-        byte []buffer = new byte[1024];
-        String ip = "192.168.0.1";
-        System.out.println(ip.getBytes(StandardCharsets.UTF_8));
-
+    public static void main(String[] args) throws IOException {
+        String[] strings = new String[3];
+        strings[0]="line0";
+        strings[1]="line1";
+        strings[2]="line2";
+        Methods.writeFile("UDP_socket.txt",strings);
     }
 
 }

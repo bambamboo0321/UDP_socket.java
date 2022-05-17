@@ -1,62 +1,24 @@
 import java.net.*;
-import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
-import java.util.Enumeration;
 import java.util.Scanner;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class client {
-    private static InetAddress getLocalHostLANAddress() throws UnknownHostException {
-        try {
-            InetAddress candidateAddress = null;
-            // 遞迴所有網路通道
-            for (Enumeration ifaces = NetworkInterface.getNetworkInterfaces(); ifaces.hasMoreElements(); ) {
-                NetworkInterface iface = (NetworkInterface) ifaces.nextElement();
-                // 在所有的網路通道下遍历IP
-                for (Enumeration inetAddrs = iface.getInetAddresses(); inetAddrs.hasMoreElements(); ) {
-                    InetAddress inetAddr = (InetAddress) inetAddrs.nextElement();
-                    if (!inetAddr.isLoopbackAddress()) {// 排除loopback類型的IP位址
-                        if (inetAddr.isSiteLocalAddress()) {
-                            // 如果是site-localIP位址，就是它了
-                            return inetAddr;
-                        } else if (candidateAddress == null) {
-                            // site-local類型的IP位址沒被發現，先記錄起來
-                            candidateAddress = inetAddr;
-                        }
-                    }
-                }
-            }
-            if (candidateAddress != null) {
-                return candidateAddress;
-            }
-            // 若只有 loopback IP位址,則只能選其他的
-            InetAddress jdkSuppliedAddress = InetAddress.getLocalHost();
-            if (jdkSuppliedAddress == null) {
-                throw new UnknownHostException("The JDK InetAddress.getLocalHost() method unexpectedly returned null.");
-            }
-            return jdkSuppliedAddress;
-        } catch (Exception e) {
-            UnknownHostException unknownHostException = new UnknownHostException(
-                    "Failed to determine LAN address: " + e);
-            unknownHostException.initCause(e);
-            throw unknownHostException;
-        }
-    }
-    public static  void main(String args[])throws Exception
+    public static  void main(String[] args)throws Exception
     {
-        String msg, result, total_data="", f = null, rank;
+        String msg, result, total_data, f, rank;
         String []c = {"0", "1" , "2", "3", "4", "5", "6", "7", "8"
                 , "9", "A", "B", "C", "D", "E", "F"};
-        int client_portNo = 5555, server_portNo = 5550, n, fMin = 0, fSec = 0, lMin = 0, lSec = 0,cost_time = 0, count = 0;
-        Boolean wrong_input_string = false, flag = true;
+        int client_portNo = 5555, server_portNo = 5550, n, fMin = 0, fSec = 0, lMin, lSec ,cost_time , count = 0;
+        boolean wrong_input_string = false, flag = true;
         byte[] rcv_buf = new byte[2048];
         byte[] buf = new byte[2048];
         Scanner scanner = new Scanner(System.in);
         DatagramSocket socket = new DatagramSocket(client_portNo);//設定socket需要設定port
         DatagramPacket rcv_packet = new DatagramPacket(rcv_buf, rcv_buf.length);
         //建立Datagram packet資料封包,限制packet值和長度大小
-        System.out.println(getLocalHostLANAddress());
+        System.out.println(Methods.getLocalHostLANAddress());
         System.out.println("Please input your name :");
         String name = scanner.next();
         System.out.println("Please input the IP address of destination :");
@@ -94,10 +56,11 @@ public class client {
                         wrong_input_string = true;
                         for(int j = 0; j < 16; j++)
                         {
-                            if(msg.substring(i,i+1).equals(c[j]))
+                            if (msg.substring(i, i + 1).equals(c[j])) {
                                 wrong_input_string = false;
+                                break;
+                            }
                         }
-                        if(wrong_input_string) continue;
                     }
                 }while (msg.length() != n || wrong_input_string);
 
@@ -111,7 +74,7 @@ public class client {
                 socket.receive(rcv_packet);//get result of compare
                 result = new String(rcv_buf, 0, rcv_packet.getLength());
                 System.out.println("count:"+count+" result"+result);
-            }while(!result.equals(Integer.toString(n)+"A0B"));
+            }while(!result.equals(n+"A0B"));
             //calculate cost time
             Calendar lCal = Calendar.getInstance();
             lMin = lCal.get(Calendar.MINUTE);
