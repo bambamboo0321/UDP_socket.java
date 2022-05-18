@@ -10,7 +10,7 @@ public class client {
         String msg, result, total_data, f, rank;
         String []c = {"0", "1" , "2", "3", "4", "5", "6", "7", "8"
                 , "9", "A", "B", "C", "D", "E", "F"};
-        int client_portNo = 5555, server_portNo = 5550, n, fMin = 0, fSec = 0, lMin, lSec ,cost_time , count = 0;
+        int client_portNo = 5555, server_portNo = 35252, n, fMin = 0, fSec = 0, lMin, lSec ,cost_time , count = 0;
         boolean wrong_input_string = false, flag = true;
         byte[] rcv_buf = new byte[2048];
         byte[] buf = new byte[2048];
@@ -23,7 +23,7 @@ public class client {
         String name = scanner.next();
         System.out.println("Please input the IP address of destination :");
         String ServerIP = scanner.next();
-        InetAddress addr = InetAddress.getByName("192.168.0.11");
+        InetAddress addr = InetAddress.getByName(ServerIP);
 
         //訊息封包(值 大小 位址 port)
         DatagramPacket send_packet = new DatagramPacket(ServerIP.getBytes(), ServerIP.length(), addr, server_portNo);

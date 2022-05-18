@@ -14,7 +14,7 @@ public class server {
         String[][] arr = new String[50][4];
         String []c = {"0", "1" , "2", "3", "4", "5", "6", "7", "8"
                 , "9", "A", "B", "C", "D", "E", "F"};
-        int client_portNo = 5555, server_portNo = 5550, readLine = 0;//server在5550監聽
+        int client_portNo = 5555, server_portNo = 35252, readLine = 0;//server在5550監聽
         boolean flag = true, wrong_input_string = false;
         System.out.println(Methods.getLocalHostLANAddress());
         System.out.println("Server端開始接受連線請求!");
