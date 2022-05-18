@@ -1,11 +1,5 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.net.*;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -19,6 +13,7 @@ public class client {
     public static JTextField player_name = window.addTextField("guest", "player_name", 10);
     public static JLabel IP = window.addLabel("IP","IP");
     public static JTextField destination = window.addTextField("", "serverIP", 10);
+    public static JTextField Answer = window.addTextField("", "answer", 10);
 
     public static String name="guest",ServerIP="0.0.0.0";
     public static void addComponents() {
@@ -29,23 +24,17 @@ public class client {
         line1.setBounds(10,window.screen.height/5,window.screen.width/2-40,50);
 
         connect.setSize(160,40);
-        connect.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                name = player_name.getText();
-                ServerIP = destination.getText();
-            }
+        connect.addActionListener(e -> {
+            name = player_name.getText();
+            ServerIP = destination.getText();
         });
         line1.add(connect);
-
 
         player.setSize(80,40);
         line1.add(player);
 
-
         player_name.setSize(160,40);
         line1.add(player_name);
-
 
         IP.setSize(40,40);
         line1.add(IP);
@@ -53,7 +42,14 @@ public class client {
         destination.setSize(320,40);
         line1.add(destination);
 
+        JPanel line2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        line2.setBounds(10,window.screen.height/5+60,window.screen.width/2-40,50);
+
+        Answer.setSize(160,40);
+        line2.add(Answer);
+
         panel.frame.add(line1);
+        panel.frame.add(line2);
     }
     public static String checkInput(int n) {
         List<String> dir = Arrays.asList("0", "1" , "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F");
@@ -81,16 +77,16 @@ public class client {
     }
     public static void main(String[] args)throws Exception
     {
-        int port = 48484;
         addComponents();
         panel.setShow(true);
-        String result, f, rank;
-        int n, fMin = 0, fSec = 0, lMin, lSec ,cost_time , count = 0;
-        boolean flag = true;
+
+        int flag = 0;
         String player_msg;
-        while(flag) {
+        while(flag == 0) {
+            int n, fMin = 0, fSec = 0, lMin, lSec ,cost_time , count = 0;
+            String result, rank;
             //receive server 傳送的n
-            client_socket cs = new client_socket(port, ServerIP);
+            client_socket cs = new client_socket(48484, ServerIP);
             System.out.println("~~~~~~Wait server response~~~~~~");
             n = Integer.parseInt(cs.receive());//訊息轉字串
 
@@ -125,15 +121,9 @@ public class client {
             rank = cs.receive();
             System.out.println(rank);
 
-            Scanner scanner = new Scanner(System.in);
-            System.out.print("是否繼續( Y / N ) ? ");
-            f = scanner.next();
-            while (!f.equals("Y") && !f.equals("N")) {
-                System.out.print("請重新輸入是否繼續( Y / N ) ? ");
-                f = scanner.next();
-            }
-            if (f.equals("N")) flag = false;
-            cs.sendMessage(f);
+            flag = JOptionPane.showConfirmDialog(panel.frame,"是否繼續遊玩","選擇",JOptionPane.YES_NO_OPTION);
+            if(flag == 1) cs.sendMessage("N");
+            else cs.sendMessage("Y");
         }
         System.out.println("程式結束");
     }
