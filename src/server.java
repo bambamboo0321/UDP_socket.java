@@ -16,30 +16,6 @@ public class server {
     public static JLabel IP = window.addLabel("IP","IP");
     public static JTextField destination = window.addTextField("", "serverIP", 10);
     public static JTextField Answer = window.addTextField("", "answer", 10);
-    public static String checkInput(int n) {
-        List<String> dir = Arrays.asList("0", "1" , "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F");
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("輸入 "+n +" 位數猜測字串:");
-        String msg = scanner.next();
-        boolean pass = false;
-        while(!pass) {
-            if(msg.length() != n) {
-                System.out.println("請重新輸入 "+n+" 位數猜測字串");
-                msg = scanner.next();
-            }
-            else{
-                pass = true;
-                for(int i = 0; i < msg.length(); i++)
-                {
-                    if(!dir.contains(msg.substring(i, i + 1))) {
-                        pass = false;
-                        break;
-                    }
-                }
-            }
-        }
-        return msg;
-    }
     public static String name="guest",ServerIP="0.0.0.0";
     public static int flag = 2;// 若flag = 2，則跳在IP、名字可編輯模式，flag = 0 >> 遊玩中
     public static void main(String[] args)throws Exception
