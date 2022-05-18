@@ -1,9 +1,8 @@
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class operator {
     public String name;
@@ -56,12 +55,28 @@ public class operator {
         writer.flush();
         writer.close();
     }
+    public static void readFile(String fileName, List<operator> content) throws IOException{
+        try {
+            File myObj = new File(fileName);
+            Scanner myReader = new Scanner(myObj);
+            while (myReader.hasNextLine()) {
+                String data = myReader.nextLine();
+                String[] temp = data.split(",");
+                operator tmp = new operator(temp[0], temp[1], Integer.parseInt(temp[2]), Integer.parseInt(temp[3]));
+                content.add(tmp);
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+
+    }
     public static void toTxt(String fileName,List<operator> content) throws IOException {
         List<String> e = new ArrayList<>();
         for(int i=0;i< content.size();i++) {
             e.add(content.get(i).getString());
         }
         operator.writeFile(fileName,e);
-
     }
 }

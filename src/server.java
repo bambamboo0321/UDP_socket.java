@@ -12,11 +12,9 @@ public class server {
     {
         Scanner scanner = new Scanner(System.in);
         byte[] buffer = new byte[2048];
-        String result, total_data;
+        String result, guess, total_data;
         String[] temp;
         String[][] arr = new String[50][4];
-        String []c = {"0", "1" , "2", "3", "4", "5", "6", "7", "8"
-                , "9", "A", "B", "C", "D", "E", "F"};
         int port = 48484, readLine = 0;//server在5550監聽
         boolean flag = true, wrong_input_string = false;
         List<operator> grade = new ArrayList<>();
@@ -28,67 +26,44 @@ public class server {
         socket.receive(rcv_packet);
         while (flag)
         {
+            client_socket cs = new client_socket(port, ServerIP);
             System.out.println("請輸入 N 位數 :");
             int n = scanner.nextInt();
-            DatagramPacket send_packet = new DatagramPacket(String.valueOf(n).getBytes()
-                    ,String.valueOf(n).length(),rcv_packet.getAddress(),port);
+            cs.sendMessage(String.valueOf(n));//send n to client
 
-            socket.send(send_packet);//send n to client
             //題目設定
             System.out.println("請輸入 N 位數正確字串");
             String ans = scanner.next();
-            do{
-                if(wrong_input_string)
-                {
-                    wrong_input_string = false;
-                    System.out.println("請重新輸入 N 位數正確字串");
-                    ans = scanner.next();
-                }
-                for(int i = 0; i < ans.length(); i++)
-                {
-                    wrong_input_string = true;
-                    for(int j = 0; j < 16; j++)
-                    {
-                        if (ans.substring(i, i + 1).equals(c[j])) {
-                            wrong_input_string = false;
-                            break;
-                        }
-                    }
-                }
-            }while (ans.length() != n || wrong_input_string);
+            ans = window.checkInput(n);
 
             System.out.println("開始遊戲!!在client端請輸入 N 位數字串");
 
             do{
                 System.out.println("~~~~~~Wait client response~~~~~~");
-                socket.receive(rcv_packet);//receive guess string
-                String guess = new String(buffer,0, rcv_packet.getLength());//訊息轉字串
+                guess = cs.receive();//receive guess string
                 System.out.println(guess);
                 result = Methods.compare(guess, ans);
-                send_packet = new DatagramPacket(result.getBytes(),result.length(),rcv_packet.getAddress(),port);
-                socket.send(send_packet);
+                cs.sendMessage(result);
             }while (!result.equals(n+"A0B"));
 
             System.out.println("~~~~~~Wait client response~~~~~~");
-            rcv_packet = new DatagramPacket(buffer, buffer.length);
-            socket.receive(rcv_packet);
-            total_data = new String(rcv_packet.getData(), 0, rcv_packet.getLength());
+
+
+            total_data = cs.receive();
             temp = total_data.split(",");
             grade = new ArrayList<>();
+            operator.readFile("UDP_socket.txt",grade);
             operator tmp = new operator(temp[0],temp[1],Integer.parseInt(temp[2]),Integer.parseInt(temp[3]));
             grade.add(tmp);
 
-            result = temp[0] + ",恭喜你猜對了！你是第" + operator.getRank(grade, tmp.name) + "名";
+            result = tmp.name + ",恭喜你猜對了！你是第" + operator.getRank(grade, tmp.name) + "名";
 
             System.out.println(result);
-            send_packet = new DatagramPacket(result.getBytes(StandardCharsets.UTF_8),result.length()
-                    ,rcv_packet.getAddress(),port);
-            socket.send(send_packet);
+            cs.sendMessage(result);
 
             System.out.println("~~~~~~Wait client response~~~~~~");
 
-            socket.receive(rcv_packet);//是否繼續
-            String f = new String(buffer, 0, rcv_packet.getLength());//訊息轉字串
+            String f=cs.receive();//是否繼續
             if(f.equalsIgnoreCase("N")) flag = false;
         }
         socket.close();

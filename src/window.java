@@ -2,6 +2,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
 
 public class window {
     public JFrame frame;
@@ -56,6 +59,30 @@ public class window {
         jButton.setName(ID);
         jButton.setFont(new Font(Font.DIALOG, Font.PLAIN, font_size));
         return jButton;
+    }
+    public static String checkInput(int n) {
+        List<String> dir = Arrays.asList("0", "1" , "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F");
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("輸入 "+n +" 位數猜測字串:");
+        String msg = scanner.next();
+        boolean pass = false;
+        while(!pass) {
+            if(msg.length() != n) {
+                System.out.println("請重新輸入 "+n+" 位數猜測字串");
+                msg = scanner.next();
+            }
+            else{
+                pass = true;
+                for(int i = 0; i < msg.length(); i++)
+                {
+                    if(!dir.contains(msg.substring(i, i + 1))) {
+                        pass = false;
+                        break;
+                    }
+                }
+            }
+        }
+        return msg;
     }
 
 }

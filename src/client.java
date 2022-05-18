@@ -2,10 +2,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.net.*;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -55,30 +51,6 @@ public class client {
 
         panel.frame.add(line1);
     }
-    public static String checkInput(int n) {
-        List<String> dir = Arrays.asList("0", "1" , "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F");
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("輸入 "+n +" 位數猜測字串:");
-        String msg = scanner.next();
-        boolean pass = false;
-        while(!pass) {
-            if(msg.length() != n) {
-                System.out.println("請重新輸入 "+n+" 位數猜測字串");
-                msg = scanner.next();
-            }
-            else{
-                pass = true;
-                for(int i = 0; i < msg.length(); i++)
-                {
-                    if(!dir.contains(msg.substring(i, i + 1))) {
-                        pass = false;
-                        break;
-                    }
-                }
-            }
-        }
-        return msg;
-    }
     public static void main(String[] args)throws Exception
     {
         int port = 48484;
@@ -95,7 +67,7 @@ public class client {
             n = Integer.parseInt(cs.receive());//訊息轉字串
 
             do {
-                player_msg = checkInput(n);
+                player_msg = window.checkInput(n);
                 if (count == 0) {
                     Calendar fCal = Calendar.getInstance();
                     fMin = fCal.get(Calendar.MINUTE);
