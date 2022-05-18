@@ -26,7 +26,7 @@ public class server {
         socket.receive(rcv_packet);
         while (flag)
         {
-            client_socket cs = new client_socket(port, ServerIP);
+            client_socket cs = new client_socket(port, "0.0.0.0");
             System.out.println("請輸入 N 位數 :");
             int n = scanner.nextInt();
             cs.sendMessage(String.valueOf(n));//send n to client
