@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileWriter;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -16,8 +17,9 @@ public class server {
         String[][] arr = new String[50][4];
         String []c = {"0", "1" , "2", "3", "4", "5", "6", "7", "8"
                 , "9", "A", "B", "C", "D", "E", "F"};
-        int client_portNo = 5555, server_portNo = 35252, readLine = 0;//server在5550監聽
+        int client_portNo = 5555, server_portNo = 48484, readLine = 0;//server在5550監聽
         boolean flag = true, wrong_input_string = false;
+        List<operator> grade = new ArrayList<>();
         System.out.println(Methods.getLocalHostLANAddress());
         System.out.println("Server端開始接受連線請求!");
         DatagramSocket socket = new DatagramSocket(server_portNo);//設定socket需要設定port
@@ -68,48 +70,29 @@ public class server {
             }while (!result.equals(n+"A0B"));
 
             System.out.println("~~~~~~Wait client response~~~~~~");
+            rcv_packet = new DatagramPacket(buffer, buffer.length);
             socket.receive(rcv_packet);
             total_data = new String(rcv_packet.getData(), 0, rcv_packet.getLength());
-            temp = total_data.split("，");
+            temp = total_data.split(",");
+            grade = new ArrayList<>();
+            operator tmp = new operator(temp[0],temp[1],Integer.parseInt(temp[2]),Integer.parseInt(temp[3]));
+            grade.add(tmp);
 
-            File doc = new File(".\\UDP_socket.txt");
-            if(!doc.exists()) {
-                doc.createNewFile();
-            }
+            result = temp[0] + ",恭喜你猜對了！你是第" + operator.getRank(grade, tmp.name) + "名";
 
-            Scanner obj = new Scanner(doc);
-            readLine = 0;
-            while (obj.hasNextLine()) {
-                arr[readLine] = obj.nextLine().split("，");
-                readLine++;
-                obj.close();
-                int p;
-                for (p = 0; p < readLine; p++) {
-                    if (Integer.parseInt(temp[3]) < Integer.parseInt(arr[p][3]))
-                        break;
-                }
-
-                List<String> tmp = new ArrayList<>();
-
-                for (int j = 0; j < readLine; j++) {
-                    if (p == j)
-                        tmp.add(total_data);
-                    String x = arr[j][0] + "，" + arr[j][1] + "，" + arr[j][2] + "，" + arr[j][3];
-                    tmp.add(x);
-                }
-                Methods.writeFile("UDP_socket.txt",tmp);
-                result = temp[0] + ",恭喜你猜對了!你是第" + p + 1 + "名";
-
-                System.out.println(result);
-            }
-            send_packet = new DatagramPacket(result.getBytes("GBK"),result.length()
+            System.out.println(result);
+            send_packet = new DatagramPacket(result.getBytes(StandardCharsets.UTF_8),result.length()
                     ,rcv_packet.getAddress(),client_portNo);
             socket.send(send_packet);
+
             System.out.println("~~~~~~Wait client response~~~~~~");
-            socket.receive(rcv_packet);
+
+            socket.receive(rcv_packet);//是否繼續
             String f = new String(buffer, 0, rcv_packet.getLength());//訊息轉字串
             if(f.equalsIgnoreCase("N")) flag = false;
         }
+        socket.close();
+        operator.toTxt("UDP_socket.txt",grade);
         System.out.println("程式結束");
     }
 

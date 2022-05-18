@@ -1,4 +1,5 @@
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Scanner;
 import java.time.LocalDateTime;
@@ -10,7 +11,7 @@ public class client {
         String msg, result, total_data, f, rank;
         String []c = {"0", "1" , "2", "3", "4", "5", "6", "7", "8"
                 , "9", "A", "B", "C", "D", "E", "F"};
-        int client_portNo = 5555, server_portNo = 35252, n, fMin = 0, fSec = 0, lMin, lSec ,cost_time , count = 0;
+        int client_portNo = 5555, server_portNo = 48484, n, fMin = 0, fSec = 0, lMin, lSec ,cost_time , count = 0;
         boolean wrong_input_string = false, flag = true;
         byte[] rcv_buf = new byte[2048];
         byte[] buf = new byte[2048];
@@ -37,13 +38,6 @@ public class client {
             do{
                 System.out.print("輸入 "+n +" 位數猜測字串:");
                 msg = scanner.next();
-                if(count == 0)
-                {
-                    Calendar fCal = Calendar.getInstance();
-                    fMin = fCal.get(Calendar.MINUTE);
-                    fSec = fCal.get(Calendar.SECOND);
-                    System.out.println("min:"+fMin+" sec"+fSec);
-                }
                 do{
                     if(wrong_input_string || msg.length() != n)
                     {
@@ -63,7 +57,13 @@ public class client {
                         }
                     }
                 }while (msg.length() != n || wrong_input_string);
-
+                if(count == 0)
+                {
+                    Calendar fCal = Calendar.getInstance();
+                    fMin = fCal.get(Calendar.MINUTE);
+                    fSec = fCal.get(Calendar.SECOND);
+                    System.out.println("min:"+fMin+" sec"+fSec);
+                }
                 send_packet = new DatagramPacket(msg.getBytes(), msg.length(), addr, server_portNo);//訊息封包(值 大小 位址 port)
                 socket.send(send_packet);//send guess
                 count++;
@@ -79,23 +79,22 @@ public class client {
             Calendar lCal = Calendar.getInstance();
             lMin = lCal.get(Calendar.MINUTE);
             lSec = lCal.get(Calendar.SECOND);
-            System.out.println("lmin:"+ lMin +" fmin:"+fMin+" sec:"+lSec+" fSec:"+fSec);
 
             if(lSec-fSec<0) lMin -= 1;
             cost_time = 60 * ((lMin-fMin<0)?lMin+60-fMin:lMin-fMin)  + ((lSec-fSec<0)?lSec+60-lSec:lSec-fSec);
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
             //send total data to server
-            total_data=name+"，"+dtf.format(LocalDateTime.now())+"，"+count+"，"+cost_time;
-            System.out.println(total_data);
-            send_packet = new DatagramPacket(total_data.getBytes(), total_data.length()
-                    , addr, server_portNo);//訊息封包(值 大小 位址 port)
+
+            operator temp = new operator(name, dtf.format(LocalDateTime.now()), count, cost_time);
+            send_packet = new DatagramPacket(temp.getString().getBytes(StandardCharsets.UTF_8)
+                    ,temp.getString().length(),addr, server_portNo);
             socket.send(send_packet);
 
             System.out.println("~~~~~~Wait server response~~~~~~");
 
             rcv_packet = new DatagramPacket(buf, buf.length);
             socket.receive(rcv_packet);//receive rank from server
-            rank = new String(rcv_packet.getData(), 0, rcv_packet.getLength(),"GBK");
+            rank = new String(rcv_packet.getData(), 0, rcv_packet.getLength(),StandardCharsets.UTF_8);
             System.out.println(rank);
 
             System.out.print("是否繼續( Y / N ) ? ");
