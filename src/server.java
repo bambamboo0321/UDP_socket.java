@@ -17,12 +17,12 @@ public class server {
         String[][] arr = new String[50][4];
         String []c = {"0", "1" , "2", "3", "4", "5", "6", "7", "8"
                 , "9", "A", "B", "C", "D", "E", "F"};
-        int client_portNo = 5555, server_portNo = 48484, readLine = 0;//server在5550監聽
+        int port = 48484, readLine = 0;//server在5550監聽
         boolean flag = true, wrong_input_string = false;
         List<operator> grade = new ArrayList<>();
         System.out.println(Methods.getLocalHostLANAddress());
         System.out.println("Server端開始接受連線請求!");
-        DatagramSocket socket = new DatagramSocket(server_portNo);//設定socket需要設定port
+        DatagramSocket socket = new DatagramSocket(port);//設定socket需要設定port
         DatagramPacket rcv_packet = new DatagramPacket(buffer, buffer.length);
         System.out.println("~~~~~~Wait client response~~~~~~");
         socket.receive(rcv_packet);
@@ -31,7 +31,7 @@ public class server {
             System.out.println("請輸入 N 位數 :");
             int n = scanner.nextInt();
             DatagramPacket send_packet = new DatagramPacket(String.valueOf(n).getBytes()
-                    ,String.valueOf(n).length(),rcv_packet.getAddress(),client_portNo);
+                    ,String.valueOf(n).length(),rcv_packet.getAddress(),port);
 
             socket.send(send_packet);//send n to client
             //題目設定
@@ -65,7 +65,7 @@ public class server {
                 String guess = new String(buffer,0, rcv_packet.getLength());//訊息轉字串
                 System.out.println(guess);
                 result = Methods.compare(guess, ans);
-                send_packet = new DatagramPacket(result.getBytes(),result.length(),rcv_packet.getAddress(),client_portNo);
+                send_packet = new DatagramPacket(result.getBytes(),result.length(),rcv_packet.getAddress(),port);
                 socket.send(send_packet);
             }while (!result.equals(n+"A0B"));
 
@@ -82,7 +82,7 @@ public class server {
 
             System.out.println(result);
             send_packet = new DatagramPacket(result.getBytes(StandardCharsets.UTF_8),result.length()
-                    ,rcv_packet.getAddress(),client_portNo);
+                    ,rcv_packet.getAddress(),port);
             socket.send(send_packet);
 
             System.out.println("~~~~~~Wait client response~~~~~~");
