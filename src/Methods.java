@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
+import java.util.List;
 
 public class Methods {
     public static InetAddress getLocalHostLANAddress() throws UnknownHostException {
@@ -59,11 +60,11 @@ public class Methods {
         }
         return (a+"A"+b+"B");
     }
-    public static void writeFile(String fileName,String[] content) throws IOException {
+    public static void writeFile(String fileName, List<String> content) throws IOException {
         File file = new File(fileName);
         FileWriter writer = new FileWriter(file);
-        for(int i=0;i< content.length;i++) {
-            writer.write(content[i]);
+        for(int i=0;i< content.size();i++) {
+            writer.write(content.get(i)+"\r\n");
         }
         writer.flush();
         writer.close();

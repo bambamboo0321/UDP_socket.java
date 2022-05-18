@@ -1,6 +1,8 @@
 import java.io.File;
 import java.io.FileWriter;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class server {
@@ -76,7 +78,7 @@ public class server {
             }
 
             Scanner obj = new Scanner(doc);
-
+            readLine = 0;
             while (obj.hasNextLine()) {
                 arr[readLine] = obj.nextLine().split("，");
                 readLine++;
@@ -85,18 +87,19 @@ public class server {
                 for (p = 0; p < readLine; p++) {
                     if (Integer.parseInt(temp[3]) < Integer.parseInt(arr[p][3]))
                         break;
-
                 }
-                FileWriter fw = new FileWriter(".\\UDP_socket.txt");
 
-                for (int j = 0; j < readLine; p++) {
+                List<String> tmp = new ArrayList<>();
+
+                for (int j = 0; j < readLine; j++) {
                     if (p == j)
-                        fw.write(total_data);
-                    fw.write(arr[j][0] + "，" + arr[j][1] + "，" + arr[j][2] + "，" + arr[j][3]);
+                        tmp.add(total_data);
+                    String x = arr[j][0] + "，" + arr[j][1] + "，" + arr[j][2] + "，" + arr[j][3];
+                    tmp.add(x);
                 }
-                fw.flush();
-                fw.close();
+                Methods.writeFile("UDP_socket.txt",tmp);
                 result = temp[0] + ",恭喜你猜對了!你是第" + p + 1 + "名";
+
                 System.out.println(result);
             }
             send_packet = new DatagramPacket(result.getBytes("GBK"),result.length()
