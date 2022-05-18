@@ -60,7 +60,7 @@ public class client {
 
         int length = -1,count =0,time_before=0,cost_time,pass;
         while (true) {
-            client_socket cs = new client_socket(48484, ServerIP);
+            client_socket cs = new client_socket(3300, ServerIP);
             switch (operation) {
                 case "1" -> {
                     length = Integer.parseInt(cs.receive());//訊息轉字串

@@ -18,7 +18,7 @@ public class server {
         while (flag)
         {
             System.out.println(Methods.getLocalHostLANAddress());
-            server_socket cs = new server_socket(48484);
+            server_socket cs = new server_socket(3300);
             System.out.println("請輸入 N 位數 :");
             int n = scanner.nextInt();
             cs.sendMessage(String.valueOf(n));//send n to client
