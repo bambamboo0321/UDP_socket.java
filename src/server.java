@@ -11,22 +11,14 @@ public class server {
     public static void main(String[] args)throws Exception
     {
         Scanner scanner = new Scanner(System.in);
-        byte[] buffer = new byte[2048];
         String result, guess, total_data;
         String[] temp;
-        String[][] arr = new String[50][4];
-        int port = 48484, readLine = 0;//server在5550監聽
-        boolean flag = true, wrong_input_string = false;
+        boolean flag = true;
         List<operator> grade = new ArrayList<>();
-        System.out.println(Methods.getLocalHostLANAddress());
-        System.out.println("Server端開始接受連線請求!");
-        DatagramSocket socket = new DatagramSocket(port);//設定socket需要設定port
-        DatagramPacket rcv_packet = new DatagramPacket(buffer, buffer.length);
-        System.out.println("~~~~~~Wait client response~~~~~~");
-        socket.receive(rcv_packet);
         while (flag)
         {
-            client_socket cs = new client_socket(port, "0.0.0.0");
+            System.out.println(Methods.getLocalHostLANAddress());
+            server_socket cs = new server_socket(48484);
             System.out.println("請輸入 N 位數 :");
             int n = scanner.nextInt();
             cs.sendMessage(String.valueOf(n));//send n to client
@@ -34,7 +26,9 @@ public class server {
             //題目設定
             System.out.println("請輸入 N 位數正確字串");
             String ans = scanner.next();
-            ans = window.checkInput(n);
+            while(!window.checkInput(n,ans)) {
+
+            }
 
             System.out.println("開始遊戲!!在client端請輸入 N 位數字串");
 
@@ -66,7 +60,6 @@ public class server {
             String f=cs.receive();//是否繼續
             if(f.equalsIgnoreCase("N")) flag = false;
         }
-        socket.close();
         operator.toTxt("UDP_socket.txt",grade);
         System.out.println("程式結束");
     }

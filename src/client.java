@@ -3,7 +3,6 @@ import java.awt.*;
 import java.util.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 public class client {
     public static window panel = new window("Client of Game");
@@ -14,34 +13,10 @@ public class client {
     public static JLabel IP = window.addLabel("IP","IP");
     public static JTextField destination = window.addTextField("", "serverIP", 10);
     public static JTextField Answer = window.addTextField("", "answer", 10);
-    public static String checkInput(int n) {
-        List<String> dir = Arrays.asList("0", "1" , "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F");
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("輸入 "+n +" 位數猜測字串:");
-        String msg = scanner.next();
-        boolean pass = false;
-        while(!pass) {
-            if(msg.length() != n) {
-                System.out.println("請重新輸入 "+n+" 位數猜測字串");
-                msg = scanner.next();
-            }
-            else{
-                pass = true;
-                for(int i = 0; i < msg.length(); i++)
-                {
-                    if(!dir.contains(msg.substring(i, i + 1))) {
-                        pass = false;
-                        break;
-                    }
-                }
-            }
-        }
-        return msg;
-    }
     public static String name="guest",ServerIP="0.0.0.0";
     public static int flag = 2;// 若flag = 2，則跳在IP、名字可編輯模式，flag = 0 >> 遊玩中
-    public static void main(String[] args)throws Exception
-    {
+    public static boolean button_clicked = false;
+    public static void main(String[] args)throws Exception {
         console.setBounds(10,10,window.screen.width/2-40,window.screen.height/5-10);
         console.setEditable(false);
         panel.frame.add(console);
@@ -56,6 +31,7 @@ public class client {
             destination.setEditable(false);
             if(flag == 2) console.setText(console.getText() + name + "," + ServerIP +"\r\n");
             flag = 0;
+            button_clicked = true;
         });
         line1.add(connect);
 
@@ -80,51 +56,50 @@ public class client {
         panel.frame.add(line1);
         panel.frame.add(line2);
         panel.setShow(true);
+        String operation = "1";
 
-        String player_msg;
-        while(flag != 1) {
-            int n, fMin = 0, fSec = 0, lMin, lSec ,cost_time , count = 0;
-            String result, rank;
-            //receive server 傳送的n
+        int length = -1,count =0,time_before=0,cost_time,pass;
+        while (true) {
             client_socket cs = new client_socket(48484, ServerIP);
-
-            if(flag == 0) console.setText(console.getText() + "~~~~~~Wait server response~~~~~~" +"\r\n");
-            n = Integer.parseInt(cs.receive());//訊息轉字串
-            do {
-                player_msg = checkInput(n);
-                if (count == 0) {
-                    Calendar fCal = Calendar.getInstance();
-                    fMin = fCal.get(Calendar.MINUTE);
-                    fSec = fCal.get(Calendar.SECOND);
-                    if(flag == 0) console.setText(console.getText() + "min:" + fMin + " sec" + fSec +"\r\n");
+            switch (operation) {
+                case "1" -> {
+                    length = Integer.parseInt(cs.receive());//訊息轉字串
+                    if (length != -1) operation = "2";
                 }
-                cs.sendMessage(player_msg);
-                count++;
-                if(flag == 0) console.setText(console.getText() + "~~~~~~Wait server response~~~~~~" +"\r\n");
-                result = cs.receive();
-                if(flag == 0) console.setText(console.getText() + "count:" + count + " result" + result +"\r\n");
-            } while (!result.equals(n + "A0B"));//答對
-            //calculate cost time
-            Calendar lCal = Calendar.getInstance();
-            lMin = lCal.get(Calendar.MINUTE);
-            lSec = lCal.get(Calendar.SECOND);
-
-            if (lSec - fSec < 0) lMin -= 1;
-            cost_time = 60 * ((lMin - fMin < 0) ? lMin + 60 - fMin : lMin - fMin) + ((lSec - fSec < 0) ? lSec + 60 - lSec : lSec - fSec);
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-            //send total data to server
-
-            operator temp = new operator(name, dtf.format(LocalDateTime.now()), count, cost_time);
-            cs.sendMessage(temp.getString());
-
-            if(flag == 0) console.setText(console.getText() + "~~~~~~Wait server response~~~~~~" +"\r\n");
-            rank = cs.receive();
-            if(flag == 0) console.setText(console.getText() + "~~~~~~" + rank + "~~~~~~" +"\r\n");
-
-            flag = JOptionPane.showConfirmDialog(panel.frame,"是否繼續遊玩","選擇",JOptionPane.YES_NO_OPTION);
-            if(flag == 1) cs.sendMessage("N");
-            else cs.sendMessage("Y");
+                case "2" -> {
+                    if (button_clicked && window.checkInput(length, Answer.getText())) {
+                        cs.sendMessage(Answer.getText());
+                        if (count == 0) {
+                            Calendar fCal = Calendar.getInstance();
+                            time_before = fCal.get(Calendar.MINUTE) * 60 + fCal.get(Calendar.SECOND);
+                        }
+                        count++;
+                    }
+                    String temp = cs.receive();
+                    if (Objects.equals(temp, length + "A0B")) {
+                        cost_time = Calendar.getInstance().get(Calendar.MINUTE) * 60 + Calendar.getInstance().get(Calendar.SECOND) - time_before;
+                        operator opt = new operator(name, DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss").format(LocalDateTime.now()), count, cost_time);
+                        cs.sendMessage(opt.getString());
+                        operation = "3";
+                    }
+                }
+                case "3" -> {
+                    String rank = cs.receive();
+                    if (rank != null) {
+                        console.setText(console.getText() + "~~~~~~" + rank + "~~~~~~" + "\r\n");
+                        operation = "4";
+                    }
+                }
+                case "4" -> {
+                    pass = JOptionPane.showConfirmDialog(panel.frame, "是否繼續遊玩", "選擇", JOptionPane.YES_NO_OPTION);
+                    if (pass == 1) {
+                        cs.sendMessage("N");
+                        player_name.setEditable(true);
+                        destination.setEditable(true);
+                        console.setText(console.getText() + "程式結束" + "\r\n");
+                    } else cs.sendMessage("Y");
+                }
+            }
         }
-        console.setText(console.getText() + "程式結束" +"\r\n");
     }
 }
