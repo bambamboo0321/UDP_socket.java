@@ -46,16 +46,7 @@ public class operator {
         }
         return -1;
     }
-    public static void writeFile(String fileName, List<String> content) throws IOException {
-        File file = new File(fileName);
-        FileWriter writer = new FileWriter(file);
-        for(int i=0;i< content.size();i++) {
-            writer.write(content.get(i)+"\r\n");
-        }
-        writer.flush();
-        writer.close();
-    }
-    public static void readFile(String fileName, List<operator> content) throws IOException{
+    public static void readFile(String fileName, List<operator> content) {
         try {
             File myObj = new File(fileName);
             Scanner myReader = new Scanner(myObj);
@@ -70,7 +61,15 @@ public class operator {
             System.out.println("An error occurred.");
             e.printStackTrace();
         }
-
+    }
+    public static void writeFile(String fileName, List<String> content) throws IOException {
+        File file = new File(fileName);
+        FileWriter writer = new FileWriter(file);
+        for(int i=0;i< content.size();i++) {
+            writer.write(content.get(i)+"\r\n");
+        }
+        writer.flush();
+        writer.close();
     }
     public static void toTxt(String fileName,List<operator> content) throws IOException {
         List<String> e = new ArrayList<>();
@@ -78,5 +77,8 @@ public class operator {
             e.add(content.get(i).getString());
         }
         operator.writeFile(fileName,e);
+
     }
 }
+
+

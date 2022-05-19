@@ -1,105 +1,81 @@
-import javax.swing.*;
-import java.awt.*;
-import java.util.*;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Calendar;
+import java.util.Scanner;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class client {
-    public static window panel = new window("Client of Game");
-    public static JTextArea console = window.addTextArea("id", 10);
-    public static JButton connect = window.addButton("connect", "connect");
-    public static JLabel player = window.addLabel("Player","player");
-    public static JTextField player_name = window.addTextField("guest", "player_name", 10);
-    public static JLabel IP = window.addLabel("IP","IP");
-    public static JTextField destination = window.addTextField("", "serverIP", 10);
-    public static JTextField Answer = window.addTextField("", "answer", 10);
-    public static String name="guest",ServerIP="0.0.0.0";
-    public static int flag = 2;// 若flag = 2，則跳在IP、名字可編輯模式，flag = 0 >> 遊玩中
-    public static boolean button_clicked = false;
-    public static void main(String[] args)throws Exception {
-        console.setBounds(10,10,window.screen.width/2-40,window.screen.height/5-10);
-        console.setEditable(false);
-        panel.frame.add(console);
-        JPanel line1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        line1.setBounds(10,window.screen.height/5,window.screen.width/2-40,50);
+    public static  void main(String[] args)throws Exception
+    {
+        String msg, result, total_data, f, rank, tmp;
+        String []c = {"0", "1" , "2", "3", "4", "5", "6", "7", "8"
+                , "9", "A", "B", "C", "D", "E", "F"};
+        int port = 48484, n, first_time = 0 ,cost_time , count = 0;
+        boolean flag = true;
 
-        connect.setSize(160,40);
-        connect.addActionListener(e -> {
-            name = player_name.getText();
-            player_name.setEditable(false);
-            ServerIP = destination.getText();
-            destination.setEditable(false);
-            if(flag == 2) console.setText(console.getText() + name + "," + ServerIP +"\r\n");
-            flag = 0;
-            button_clicked = true;
-        });
-        line1.add(connect);
+        Scanner scanner = new Scanner(System.in);
+        System.out.println(Methods.getLocalHostLANAddress());
+        System.out.println("Please input your name :");
+        String name = scanner.next();
+        System.out.println("Please input the IP address of destination :");
+        String ServerIP = scanner.next();
+        client_socket cs = new client_socket(port, ServerIP);
+        //訊息封包(值 大小 位址 port)
+        while(flag)
+        {
 
-        player.setSize(80,40);
-        line1.add(player);
-
-        player_name.setSize(160,40);
-        line1.add(player_name);
-
-        IP.setSize(40,40);
-        line1.add(IP);
-
-        destination.setSize(320,40);
-        line1.add(destination);
-
-        JPanel line2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        line2.setBounds(10,window.screen.height/5+60,window.screen.width/2-40,50);
-
-        Answer.setSize(160,40);
-        line2.add(Answer);
-
-        panel.frame.add(line1);
-        panel.frame.add(line2);
-        panel.setShow(true);
-        String operation = "1";
-
-        int length = -1,count =0,time_before=0,cost_time,pass;
-        while (true) {
-            client_socket cs = new client_socket(3300, ServerIP);
-            switch (operation) {
-                case "1" -> {
-                    length = Integer.parseInt(cs.receive());//訊息轉字串
-                    if (length != -1) operation = "2";
+            //receive server 傳送的n
+            System.out.println("~~~~~~Wait server response~~~~~~");
+            tmp = cs.receive();
+            n = Integer.parseInt(tmp);//訊息轉字串
+            do{
+                System.out.print("輸入 "+n +" 位數猜測字串:");
+                msg = scanner.next();
+                while (!window.checkInput(n,msg))
+                {
+                    System.out.print("請重新輸入 "+n +" 位數猜測字串:");
+                    msg = scanner.next();
                 }
-                case "2" -> {
-                    if (button_clicked && window.checkInput(length, Answer.getText())) {
-                        cs.sendMessage(Answer.getText());
-                        if (count == 0) {
-                            Calendar fCal = Calendar.getInstance();
-                            time_before = fCal.get(Calendar.MINUTE) * 60 + fCal.get(Calendar.SECOND);
-                        }
-                        count++;
-                    }
-                    String temp = cs.receive();
-                    if (Objects.equals(temp, length + "A0B")) {
-                        cost_time = Calendar.getInstance().get(Calendar.MINUTE) * 60 + Calendar.getInstance().get(Calendar.SECOND) - time_before;
-                        operator opt = new operator(name, DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss").format(LocalDateTime.now()), count, cost_time);
-                        cs.sendMessage(opt.getString());
-                        operation = "3";
-                    }
+                if(count == 0)
+                {
+                    Calendar fCal = Calendar.getInstance();
+                    first_time = fCal.get(Calendar.MINUTE)*60 + fCal.get(Calendar.SECOND);
                 }
-                case "3" -> {
-                    String rank = cs.receive();
-                    if (rank != null) {
-                        console.setText(console.getText() + "~~~~~~" + rank + "~~~~~~" + "\r\n");
-                        operation = "4";
-                    }
-                }
-                case "4" -> {
-                    pass = JOptionPane.showConfirmDialog(panel.frame, "是否繼續遊玩", "選擇", JOptionPane.YES_NO_OPTION);
-                    if (pass == 1) {
-                        cs.sendMessage("N");
-                        player_name.setEditable(true);
-                        destination.setEditable(true);
-                        console.setText(console.getText() + "程式結束" + "\r\n");
-                    } else cs.sendMessage("Y");
-                }
+                cs.sendMessage(msg);
+                count++;
+
+                System.out.println("~~~~~~Wait server response~~~~~~");
+
+                result = cs.receive();
+                System.out.println("count:"+count+" result"+result);
+            }while(!result.equals(n+"A0B"));
+            //calculate cost time
+            Calendar lCal = Calendar.getInstance();
+
+            cost_time = lCal.get(Calendar.MINUTE)*60 + lCal.get(Calendar.SECOND) - first_time;
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+            //send total data to server
+
+            operator temp = new operator(name, dtf.format(LocalDateTime.now()), count, cost_time);
+            cs.sendMessage(temp.getString());
+
+            System.out.println("~~~~~~Wait server response~~~~~~");
+
+            rank = cs.receive();
+            System.out.println(rank);
+
+            System.out.print("是否繼續( Y / N ) ? ");
+            f = scanner.next();
+            while (!f.equals("Y") && !f.equals("N"))
+            {
+                System.out.print("請重新輸入是否繼續( Y / N ) ? ");
+                f = scanner.next();
             }
+            if(f.equals("N")) flag = false;
+
+            cs.sendMessage(f);
         }
+        System.out.println("程式結束");
     }
 }
